@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2015, Vincent Garreau
+Copyright for portions of project particulate are held by Vincent Garreau 2015 as part of project particles.js. All other copyright for project particulate are held by Zachary Wegrzyniak 2019.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
