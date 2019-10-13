@@ -1,5 +1,10 @@
 import Particle from './Particle'
 
+// https://stackoverflow.com/a/47914631/1924257
+export type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>
+}
+
 export type Shape =
   | 'circle'
   | 'edge'
@@ -126,37 +131,38 @@ export type Api = {
     el?: Element | Window
     events: {
       onhover: {
-        enable: true
+        enable: boolean
         mode: InteractivityMode
       }
       onclick: {
-        enable: true
+        enable: boolean
         mode: InteractivityMode
       }
-      resize: true
+      resize: boolean
     }
     modes: {
       grab: {
         distance: number
         line_linked: {
-          opacity: 1
+          opacity: number
         }
       }
       bubble: {
         distance: number
         size: number
-        duration: 0.4
+        speed?: number
+        duration: number
         opacity?: number
       }
       repulse: {
         distance: number
-        duration: 0.4
+        duration: number
       }
       push: {
         particles_nb: number
       }
       remove: {
-        particles_nb: 2
+        particles_nb: number
       }
     }
     mouse?: {

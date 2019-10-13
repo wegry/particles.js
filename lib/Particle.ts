@@ -1,5 +1,4 @@
 import {
-  ParticleSize,
   Particles,
   Canvas,
   Shape,
@@ -45,7 +44,6 @@ interface Options {
   color: string | { value: ColorInput }
   opacity: number
   position?: { x: number; y: number }
-  particleSize: ParticleSize
   shape: Shape
   moveBounce?: boolean
   createSvgImg: (p: Particle) => void
@@ -74,29 +72,25 @@ export default class Particle implements ParticleT {
   img: Image = {}
 
   constructor(options: Options) {
-    const {
-      color,
-      createSvgImg,
-      moveBounce,
-      opacity,
-      particleSize,
-      position
-    } = options
+    const { color, createSvgImg, moveBounce, opacity, position } = options
 
     if (!Particle.canvas) {
       Particle.canvas = options.canvas
     }
 
-    if (!Particle.particles || Particle.particles !== options.particles) {
+    if (!Particle.particles) {
       Particle.particles = options.particles
     }
 
     /* size */
-    this.radius = (particleSize.random ? Math.random() : 1) * particleSize.value
-    if (particleSize.anim.enable) {
+    this.radius =
+      (Particle.particles.size.random ? Math.random() : 1) *
+      Particle.particles.size.value
+
+    if (Particle.particles.size.anim.enable) {
       this.size_status = false
-      this.vs = particleSize.anim.speed / 100
-      if (!particleSize.anim.sync) {
+      this.vs = Particle.particles.size.anim.speed / 100
+      if (!Particle.particles.size.anim.sync) {
         this.vs = this.vs * Math.random()
       }
     }
@@ -214,9 +208,6 @@ export default class Particle implements ParticleT {
       this.vx = velbase.x! + Math.random() - 0.5
       this.vy = velbase.y! + Math.random() - 0.5
     }
-    // var theta = 2.0 * Math.PI * Math.random();
-    // this.vx = Math.cos(theta);
-    // this.vy = Math.sin(theta);
     this.vx_i = this.vx
     this.vy_i = this.vy
     /* if shape is image */

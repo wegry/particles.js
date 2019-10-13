@@ -123,16 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       },
-      retina_detect: true,
-      config_demo: {
-        hide_card: false,
-        background_color: '#b61924',
-        background_image: '',
-        background_position: '50% 50%',
-        background_repeat: 'no-repeat',
-        background_size: 'cover'
-      }
-    } as any
+      retina_detect: true
+    }
   )
 
   const stats = new Stats()

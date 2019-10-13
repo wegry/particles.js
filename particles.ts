@@ -6,7 +6,7 @@
 /* ----------------------------------------------- */
 
 import deepExtend from 'deep-extend'
-import { Canvas, HSL, Position, Api } from './lib/types'
+import { Canvas, HSL, Position, Api, RecursivePartial } from './lib/types'
 import { apiDefaults } from './lib/api'
 import { hexToRgb, clamp } from './lib/funcs'
 import Particle from './lib/Particle'
@@ -135,7 +135,6 @@ export class particulate {
           opacity: this.config.particles.opacity.value,
           canvas: this.canvas,
           checkOverlap: this.checkOverlap,
-          particleSize: this.config.particles.size,
           shape: this.config.particles.shape as any,
           createSvgImg: this.createSvgImg
         })
@@ -464,7 +463,7 @@ export class particulate {
 
   pushParticles(nb: number, pos?: { pos_x: number; pos_y: number }) {
     particulate.tmp.pushing = true
-    for (const i of Array(nb).keys()) {
+    for (const i of Array(Math.floor(nb)).keys()) {
       this.config.particles.array!.push(
         new Particle!({
           particles: this.config.particles,
@@ -476,7 +475,6 @@ export class particulate {
           },
           canvas: this.canvas,
           checkOverlap: this.checkOverlap,
-          particleSize: this.config.particles.size,
           shape: this.config.particles.shape as any,
           createSvgImg: this.createSvgImg
         })
@@ -728,14 +726,6 @@ export class particulate {
         if (d <= repulseRadius) {
           process()
         }
-        // bang - slow motion mode
-        // if(!pJS.tmp.repulse_finish){
-        //   if(d <= repulseRadius){
-        //     process();
-        //   }
-        // }else{
-        //   process();
-        // }
       } else {
         if (particulate.tmp.repulse_clicking == false) {
           p.vx = p.vx_i
@@ -948,7 +938,7 @@ export class particulate {
     }
   }
 
-  constructor(tag_id: string, params: Partial<Api>) {
+  constructor(tag_id: string, params: RecursivePartial<Api>) {
     const canvas_el = document.querySelector<HTMLCanvasElement>(
       '#' + tag_id + ' > .particles-js-canvas-el'
     )!
@@ -963,7 +953,7 @@ export class particulate {
     this.config = apiDefaults
     /* params settings */
     if (params) {
-      deepExtend(particulate, params)
+      deepExtend(this.config, params)
     }
     particulate.tmp = {}
     particulate.tmp.obj = {
@@ -988,7 +978,7 @@ export class particulate {
 
 export let pJSDom: particulate[] = []
 
-export default function(tag_id: string, params: Partial<Api>) {
+export default function(tag_id: string, params: RecursivePartial<Api>) {
   //console.log(params);
 
   /* no string id? so it's object params, and set the id with default id */
