@@ -393,11 +393,18 @@ export class particulate {
           var pos_x = e.offsetX || e.clientX,
             pos_y = e.offsetY || e.clientY
         }
-        this.config.interactivity.mouse!.pos_x = pos_x
-        this.config.interactivity.mouse!.pos_y = pos_y
+        if (this.config.interactivity.mouse) {
+          this.config.interactivity.mouse.pos_x = pos_x
+          this.config.interactivity.mouse.pos_y = pos_y
+        } else {
+          this.config.interactivity.mouse = {
+            pos_x,
+            pos_y
+          }
+        }
         if (particulate.tmp.retina) {
-          this.config.interactivity.mouse!.pos_x *= this.canvas.pxratio!
-          this.config.interactivity.mouse!.pos_y *= this.canvas.pxratio!
+          this.config.interactivity.mouse.pos_x *= this.canvas.pxratio!
+          this.config.interactivity.mouse.pos_y *= this.canvas.pxratio!
         }
         this.config.interactivity.status = 'mousemove'
       })
