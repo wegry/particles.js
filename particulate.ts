@@ -8,7 +8,7 @@
 import deepExtend from 'deep-extend'
 import { Canvas, HSL, Position, Api, RecursivePartial } from './lib/types'
 import { apiDefaults } from './lib/api'
-import { hexToRgb, clamp } from './lib/funcs'
+import { hexToRgb, clamp, range } from './lib/funcs'
 import Particle from './lib/Particle'
 
 export class particulate {
@@ -127,7 +127,7 @@ export class particulate {
   }
   /* --------- pJS functions - particles ----------- */
   particlesCreate() {
-    for (var i = 0; i < this.config.particles.number.value; i++) {
+    for (const _ of Array(this.config.particles.number.value)) {
       this.config.particles.array!.push(
         new Particle({
           particles: this.config.particles,
@@ -237,7 +237,7 @@ export class particulate {
         this.config.particles.line_linked.enable ||
         this.config.particles.move.attract.enable
       ) {
-        for (var j = i + 1; j < this.config.particles.array!.length; j++) {
+        for (const j of range(i + 1, this.config.particles.array!.length)) {
           var p2 = this.config.particles.array![j]
           /* link particles */
           if (this.config.particles.line_linked.enable) {
@@ -261,16 +261,14 @@ export class particulate {
     /* update each particles param */
     this.particlesUpdate()
     /* draw each particle */
-    for (var i = 0; i < this.config.particles.array!.length; i++) {
-      var p = this.config.particles.array![i]
+    for (const p of this.config.particles.array!) {
       p.draw()
     }
   }
 
   checkOverlap(p1: Particle, position?: Position) {
-    for (var i = 0; i < this.config.particles.array!.length; i++) {
-      var p2 = this.config.particles.array![i]
-      var dx = p1.x - p2.x,
+    for (const p2 of this.config.particles.array!) {
+      const dx = p1.x - p2.x,
         dy = p1.y - p2.y,
         dist = Math.sqrt(dx * dx + dy * dy)
       if (dist <= p1.radius + p2.radius) {

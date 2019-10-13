@@ -18,3 +18,10 @@ export function hexToRgb(hex: string) {
 export function clamp(number: number, min: number, max: number) {
   return Math.min(Math.max(number, min), max)
 }
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators
+export function* range(start = 0, end = 100, step = 1) {
+  for (let i = start; i < end; i += step) {
+    yield i
+  }
+}

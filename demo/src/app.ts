@@ -10,7 +10,7 @@ particlesJS.load('particles-js', 'particles.json', function() {
 */
 
 /* Otherwise just put the config content (json): */
-import { default as particlesJS, pJSDom } from '../../particles'
+import { default as particlesJS, pJSDom } from '../../particulate'
 import Stats from './stats'
 
 document.addEventListener('DOMContentLoaded', () => {

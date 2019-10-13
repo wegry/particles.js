@@ -8,7 +8,7 @@ import {
   Position
 } from './types'
 import { hexToRgb } from './funcs'
-import { particulate } from '../particles'
+import { particulate } from '../particulate'
 
 type Image = {
   obj?: CanvasImageSource
@@ -366,7 +366,7 @@ function drawShape(
   c.beginPath()
   c.translate(startX, startY)
   c.moveTo(0, 0)
-  for (var i = 0; i < sideCount; i++) {
+  for (const _ of Array(sideCount - 1)) {
     c.lineTo(sideLength, 0)
     c.translate(sideLength, 0)
     c.rotate(interiorAngle)
