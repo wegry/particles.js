@@ -148,8 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const update = () => {
     stats.begin()
     stats.end()
-    if (pJSDom[0].pJS.particles && pJSDom[0].pJS.particles.array) {
-      count_particles.innerText = `${pJSDom[0].pJS.particles.array.length}`
+    if (pJSDom[0].config.particles && pJSDom[0].config.particles.array) {
+      count_particles.innerText = `${pJSDom[0].config.particles.array.length}`
     }
     requestAnimationFrame(update)
   }

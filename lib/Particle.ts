@@ -1,14 +1,15 @@
 import {
   ParticleSize,
+  Particles,
   Canvas,
   Shape,
   HSL,
   RGB,
   ColorInput,
   Position
-} from '../demo/src/types'
+} from './types'
 import { hexToRgb } from './funcs'
-import { State } from '../particles'
+import { particulate } from '../particles'
 
 type Image = {
   obj?: CanvasImageSource
@@ -47,7 +48,8 @@ interface Options {
   particleSize: ParticleSize
   shape: Shape
   moveBounce?: boolean
-  pJS: State
+  createSvgImg: (p: Particle) => void
+  particles: Particles
 }
 export default class Particle implements ParticleT {
   radius: number
@@ -66,28 +68,27 @@ export default class Particle implements ParticleT {
   vy_i: number
   shape: Shape = 'circle'
   static canvas: Canvas
-  static pJS: State
   static checkOverlap: (p: Particle, position?: Position) => void
+  static particles: Particles
   color: ColorInput
   img: Image = {}
 
   constructor(options: Options) {
     const {
-      canvas,
       color,
+      createSvgImg,
       moveBounce,
       opacity,
       particleSize,
-      position,
-      pJS
+      position
     } = options
 
     if (!Particle.canvas) {
-      Particle.canvas = canvas
+      Particle.canvas = options.canvas
     }
 
-    if (!Particle.pJS) {
-      Particle.pJS = pJS
+    if (!Particle.particles || Particle.particles !== options.particles) {
+      Particle.particles = options.particles
     }
 
     /* size */
@@ -99,6 +100,9 @@ export default class Particle implements ParticleT {
         this.vs = this.vs * Math.random()
       }
     }
+
+    const { canvas } = Particle
+
     /* position */
     this.x = position ? position.x : Math.random() * canvas.w
     this.y = position ? position.y : Math.random() * canvas.h
@@ -116,7 +120,7 @@ export default class Particle implements ParticleT {
       if (Array.isArray(color.value)) {
         var color_selected =
           color.value[
-            Math.floor(Math.random() * pJS.particles.color.value.length)
+            Math.floor(Math.random() * Particle.particles.color.value.length)
           ]
         ;(this.color as any).rgb = hexToRgb(color_selected)!
       } else {
@@ -159,18 +163,18 @@ export default class Particle implements ParticleT {
     }
     /* opacity */
     this.opacity =
-      (pJS.particles.opacity.random ? Math.random() : 1) *
-      pJS.particles.opacity.value
-    if (pJS.particles.opacity.anim.enable) {
+      (Particle.particles.opacity.random ? Math.random() : 1) *
+      Particle.particles.opacity.value
+    if (Particle.particles.opacity.anim.enable) {
       this.opacity_status = false
-      this.vo = pJS.particles.opacity.anim.speed / 100
-      if (!pJS.particles.opacity.anim.sync) {
+      this.vo = Particle.particles.opacity.anim.speed / 100
+      if (!Particle.particles.opacity.anim.sync) {
         this.vo = this.vo * Math.random()
       }
     }
     /* animation - velocity for speed */
     var velbase: Partial<Position> = {}
-    switch (pJS.particles.move.direction) {
+    switch (Particle.particles.move.direction) {
       case 'top':
         velbase = { x: 0, y: -1 }
         break
@@ -199,10 +203,10 @@ export default class Particle implements ParticleT {
         velbase = { x: 0, y: 0 }
         break
     }
-    if (pJS.particles.move.straight) {
+    if (Particle.particles.move.straight) {
       this.vx = velbase.x!
       this.vy = velbase.y!
-      if (pJS.particles.move.random) {
+      if (Particle.particles.move.random) {
         this.vx = this.vx * Math.random()
         this.vy = this.vy * Math.random()
       }
@@ -216,7 +220,7 @@ export default class Particle implements ParticleT {
     this.vx_i = this.vx
     this.vy_i = this.vy
     /* if shape is image */
-    var shape_type = pJS.particles.shape.type
+    var shape_type = Particle.particles.shape.type
     if (typeof shape_type == 'object') {
       if (Array.isArray(shape_type)) {
         var shape_selected =
@@ -227,15 +231,18 @@ export default class Particle implements ParticleT {
       this.shape = shape_type as Shape
     }
     if (this.shape == 'image') {
-      var sh = pJS.particles.shape
+      var sh = Particle.particles.shape
       this.img = {
         src: sh.image.src as any,
         ratio: sh.image.width / sh.image.height
       }
       if (!this.img.ratio) this.img.ratio = 1
-      if (pJS.tmp.img_type == 'svg' && pJS.tmp.source_svg != undefined) {
-        pJS.fn.vendors.createSvgImg!(this)
-        if (pJS.tmp.pushing) {
+      if (
+        particulate.tmp.img_type == 'svg' &&
+        particulate.tmp.source_svg != undefined
+      ) {
+        createSvgImg(this)
+        if (particulate.tmp.pushing) {
           this.img.loaded = false
         }
       }
@@ -244,7 +251,6 @@ export default class Particle implements ParticleT {
 
   draw() {
     var p: ParticleT = this
-    const { pJS } = Particle
 
     if (p.radius_bubble != undefined) {
       var radius = p.radius_bubble
@@ -291,7 +297,7 @@ export default class Particle implements ParticleT {
         canvas.ctx!.rect(p.x - radius, p.y - radius, radius * 2, radius * 2)
         break
       case 'triangle':
-        pJS.fn.vendors.drawShape!(
+        drawShape(
           canvas.ctx!,
           p.x - radius,
           p.y + radius / 1.66,
@@ -301,32 +307,32 @@ export default class Particle implements ParticleT {
         )
         break
       case 'polygon':
-        pJS.fn.vendors.drawShape!(
+        drawShape(
           canvas.ctx!,
-          p.x - radius / (pJS.particles.shape.polygon.nb_sides / 3.5), // startX
+          p.x - radius / (Particle.particles.shape.polygon.nb_sides / 3.5), // startX
           p.y - radius / (2.66 / 3.5), // startY
-          (radius * 2.66) / (pJS.particles.shape.polygon.nb_sides / 3), // sideLength
-          pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
+          (radius * 2.66) / (Particle.particles.shape.polygon.nb_sides / 3), // sideLength
+          Particle.particles.shape.polygon.nb_sides, // sideCountNumerator
           1 // sideCountDenominator
         )
         break
       case 'star':
-        pJS.fn.vendors.drawShape!(
+        drawShape(
           canvas.ctx!,
-          p.x - (radius * 2) / (pJS.particles.shape.polygon.nb_sides / 4), // startX
+          p.x - (radius * 2) / (Particle.particles.shape.polygon.nb_sides / 4), // startX
           p.y - radius / ((2 * 2.66) / 3.5), // startY
-          (radius * 2 * 2.66) / (pJS.particles.shape.polygon.nb_sides / 3), // sideLength
-          pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
+          (radius * 2 * 2.66) / (Particle.particles.shape.polygon.nb_sides / 3), // sideLength
+          Particle.particles.shape.polygon.nb_sides, // sideCountNumerator
           2 // sideCountDenominator
         )
         break
       case 'image':
         let img_obj: any
 
-        if (pJS.tmp.img_type == 'svg') {
+        if (particulate.tmp.img_type == 'svg') {
           img_obj = p.img.obj
         } else {
-          img_obj = pJS.tmp.img_obj
+          img_obj = particulate.tmp.img_obj
         }
         const draw = () => {
           canvas.ctx!.drawImage(
@@ -343,11 +349,38 @@ export default class Particle implements ParticleT {
         break
     }
     canvas.ctx!.closePath()
-    if (pJS.particles.shape.stroke.width > 0) {
-      canvas.ctx!.strokeStyle = pJS.particles.shape.stroke.color
-      canvas.ctx!.lineWidth = pJS.particles.shape.stroke.width
+    if (Particle.particles.shape.stroke.width > 0) {
+      canvas.ctx!.strokeStyle = Particle.particles.shape.stroke.color
+      canvas.ctx!.lineWidth = Particle.particles.shape.stroke.width
       canvas.ctx!.stroke()
     }
     canvas.ctx!.fill()
   }
+}
+
+function drawShape(
+  c: CanvasRenderingContext2D,
+  startX: number,
+  startY: number,
+  sideLength: number,
+  sideCountNumerator: number,
+  sideCountDenominator: number
+) {
+  // By Programming Thomas - https://programmingthomas.wordpress.com/2013/04/03/n-sided-shapes/
+  var sideCount = sideCountNumerator * sideCountDenominator
+  var decimalSides = sideCountNumerator / sideCountDenominator
+  var interiorAngleDegrees = (180 * (decimalSides - 2)) / decimalSides
+  var interiorAngle = Math.PI - (Math.PI * interiorAngleDegrees) / 180 // convert to radians
+  c.save()
+  c.beginPath()
+  c.translate(startX, startY)
+  c.moveTo(0, 0)
+  for (var i = 0; i < sideCount; i++) {
+    c.lineTo(sideLength, 0)
+    c.translate(sideLength, 0)
+    c.rotate(interiorAngle)
+  }
+  //c.stroke();
+  c.fill()
+  c.restore()
 }

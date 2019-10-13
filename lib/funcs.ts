@@ -14,3 +14,7 @@ export function hexToRgb(hex: string) {
       }
     : null
 }
+
+export function clamp(number: number, min: number, max: number) {
+  return Math.min(Math.max(number, min), max)
+}
